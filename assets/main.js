@@ -44,10 +44,25 @@ export default function GeschenkApp() {
   const payments = getPayments();
 
   return (
-    <div style={{ fontFamily: 'sans-serif', background: '#fffbe6', minHeight: '100vh', padding: '2rem' }}>
-      <div style={{ maxWidth: 800, margin: 'auto', background: '#ffffff', padding: '2rem', borderRadius: '1rem', boxShadow: '0 0 15px rgba(0,0,0,0.1)' }}>
+    <div style={{
+      fontFamily: 'sans-serif',
+      backgroundImage: 'url(assets/background.png)',
+      backgroundSize: 'cover',
+      minHeight: '100vh',
+      padding: '2rem',
+      backgroundPosition: 'center'
+    }}>
+      <div style={{
+        maxWidth: 900,
+        margin: 'auto',
+        background: 'rgba(255, 255, 255, 0.9)',
+        padding: '2rem',
+        borderRadius: '1rem',
+        boxShadow: '0 0 15px rgba(0,0,0,0.2)'
+      }}>
+        <img src="assets/header.png" alt="Header" style={{ width: '100%', borderRadius: '1rem', marginBottom: '1.5rem' }} />
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎁 Geschenk-Abrechnung</h1>
-        <p style={{ fontSize: '1rem', marginBottom: '2rem' }}>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br/>Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
+        <p style={{ fontSize: '1rem', marginBottom: '2rem' }}>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br />Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
 
         {data.map((person, index) => (
           <div key={index} style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center' }}>
