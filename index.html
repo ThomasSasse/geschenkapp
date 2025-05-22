@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json" />
   <title>🎁 Geschenk-Abrechnung – WSF & Playmobilfunk</title>
+  <link rel="manifest" href="manifest.json" />
   <style>
     body {
       font-family: sans-serif;
@@ -41,12 +41,12 @@
 <body>
   <div class="container">
     <img src="assets/header.png" alt="Header" style="width: 100%; border-radius: 1rem; margin-bottom: 1.5rem;">
-    <h1>🎁 Geschenk-Abrechnung</h1>
+    <h1>👨‍👩‍👧‍👦 Geschenk-Abrechnung für Familiengemeinschaft</h1>
     <p>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br>
     Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
 
     <div id="form-area"></div>
-    <button class="button" onclick="addPerson()">➕ Person hinzufügen</button>
+    <button class="button" onclick="addPerson()">➕ Familie hinzufügen</button>
 
     <div style="margin-top:2rem">
       <h2>💸 Zahlungen</h2>
@@ -56,10 +56,10 @@
 
   <script>
     let data = [
-      { name: 'Person 1', active: true, contribution: 0 },
-      { name: 'Person 2', active: true, contribution: 0 },
-      { name: 'Person 3', active: true, contribution: 0 },
-      { name: 'Person 4', active: true, contribution: 0 }
+      { name: 'Familie 1', active: true, contribution: 0 },
+      { name: 'Familie 2', active: true, contribution: 0 },
+      { name: 'Familie 3', active: true, contribution: 0 },
+      { name: 'Familie 4', active: true, contribution: 0 }
     ];
 
     function render() {
@@ -126,7 +126,7 @@
     }
 
     function addPerson() {
-      data.push({ name: `Person ${data.length + 1}`, active: true, contribution: 0 });
+      data.push({ name: `Familie ${data.length + 1}`, active: true, contribution: 0 });
       render();
     }
 
