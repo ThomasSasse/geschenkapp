@@ -61,7 +61,7 @@ export default function GeschenkApp() {
         boxShadow: '0 0 15px rgba(0,0,0,0.2)'
       }}>
         <img src="assets/header.png" alt="Header" style={{ width: '100%', borderRadius: '1rem', marginBottom: '1.5rem' }} />
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎁 Geschenk-Abrechnung</h1>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>👨‍👩‍👧‍👦 Geschenk-Abrechnung für Familiengemeinschaft</h1>
         <p style={{ fontSize: '1rem', marginBottom: '2rem' }}>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br />Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
 
         {data.map((person, index) => (
@@ -73,8 +73,8 @@ export default function GeschenkApp() {
           </div>
         ))}
 
-        <button onClick={() => setData([...data, { name: `Person ${data.length + 1}`, active: true, contribution: 0 }])} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#9f1239', color: 'white', border: 'none', borderRadius: '6px' }}>
-          ➕ Person hinzufügen
+        <button onClick={() => setData([...data, { name: `Familie ${data.length + 1}`, active: true, contribution: 0 }])} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#9f1239', color: 'white', border: 'none', borderRadius: '6px' }}>
+          ➕ Familie hinzufügen
         </button>
 
         <div style={{ marginTop: '2rem' }}>
