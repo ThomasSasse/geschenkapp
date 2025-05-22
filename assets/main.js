@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 const initialData = [
-  { name: 'Person 1', active: true, contribution: 0 },
-  { name: 'Person 2', active: true, contribution: 0 },
-  { name: 'Person 3', active: true, contribution: 0 },
-  { name: 'Person 4', active: true, contribution: 0 },
+  { name: 'Familie 1', active: true, contribution: 0 },
+  { name: 'Familie 2', active: true, contribution: 0 },
+  { name: 'Familie 3', active: true, contribution: 0 },
+  { name: 'Familie 4', active: true, contribution: 0 },
 ];
 
 export default function GeschenkApp() {
