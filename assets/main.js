@@ -1,9 +1,80 @@
-document.getElementById('root').innerHTML = `
-  <div style="font-family:sans-serif;padding:2rem;max-width:700px;margin:auto;text-align:center;background:#fffbe6;border-radius:1rem;box-shadow:0 0 12px rgba(0,0,0,0.1)">
-    <h1>🎁 Geschenk-Abrechnung</h1>
-    <p>Hallo liebe WSF- und Playmobilfunk-Freunde!<br>
-    Diese App wird euch gleich anzeigen, wer wie viel beigetragen hat und wer wem wie viel schuldet.</p>
-    <p><strong>Interaktive Version kommt im nächsten Schritt!</strong></p>
-    <p style="font-size:0.9rem;color:#999">Deine App ist korrekt geladen – du siehst diese Seite, weil der Code bisher leer war.</p>
-  </div>
-`;
+import { useState } from 'react';
+
+const initialData = [
+  { name: 'Person 1', active: true, contribution: 0 },
+  { name: 'Person 2', active: true, contribution: 0 },
+  { name: 'Person 3', active: true, contribution: 0 },
+  { name: 'Person 4', active: true, contribution: 0 },
+];
+
+export default function GeschenkApp() {
+  const [data, setData] = useState(initialData);
+
+  const handleChange = (index, field, value) => {
+    const newData = [...data];
+    newData[index][field] = field === 'contribution' ? parseFloat(value) || 0 : value;
+    setData(newData);
+  };
+
+  const activePeople = data.filter(p => p.active);
+  const total = activePeople.reduce((sum, p) => sum + p.contribution, 0);
+  const average = activePeople.length ? total / activePeople.length : 0;
+
+  const getPayments = () => {
+    const creditors = activePeople.map(p => ({ ...p })).filter(p => p.contribution > average);
+    const debtors = activePeople.filter(p => p.contribution < average);
+    const payments = [];
+
+    for (let debtor of debtors) {
+      let amountOwed = average - debtor.contribution;
+      for (let creditor of creditors) {
+        const creditorOver = creditor.contribution - average;
+        const portion = Math.min(amountOwed, creditorOver);
+        if (portion > 0) {
+          payments.push({ from: debtor.name, to: creditor.name, amount: portion });
+          amountOwed -= portion;
+          creditor.contribution -= portion;
+        }
+        if (amountOwed <= 0) break;
+      }
+    }
+    return payments;
+  };
+
+  const payments = getPayments();
+
+  return (
+    <div style={{ fontFamily: 'sans-serif', background: '#fffbe6', minHeight: '100vh', padding: '2rem' }}>
+      <div style={{ maxWidth: 800, margin: 'auto', background: '#ffffff', padding: '2rem', borderRadius: '1rem', boxShadow: '0 0 15px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎁 Geschenk-Abrechnung</h1>
+        <p style={{ fontSize: '1rem', marginBottom: '2rem' }}>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br/>Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
+
+        {data.map((person, index) => (
+          <div key={index} style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+            <input type="checkbox" checked={person.active} onChange={(e) => handleChange(index, 'active', e.target.checked)} />
+            <input type="text" value={person.name} onChange={(e) => handleChange(index, 'name', e.target.value)} placeholder="Name" style={{ flex: 1 }} />
+            <input type="number" value={person.contribution} onChange={(e) => handleChange(index, 'contribution', e.target.value)} style={{ width: '100px' }} />
+            <span style={{ width: '100px' }}>Saldo: {(person.contribution - average).toFixed(2)} €</span>
+          </div>
+        ))}
+
+        <button onClick={() => setData([...data, { name: `Person ${data.length + 1}`, active: true, contribution: 0 }])} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#9f1239', color: 'white', border: 'none', borderRadius: '6px' }}>
+          ➕ Person hinzufügen
+        </button>
+
+        <div style={{ marginTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>💸 Zahlungen</h2>
+          {payments.length === 0 ? (
+            <p>Alle Beiträge sind ausgeglichen.</p>
+          ) : (
+            <ul>
+              {payments.map((p, i) => (
+                <li key={i}>{p.from} zahlt {p.amount.toFixed(2)} € an {p.to}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
