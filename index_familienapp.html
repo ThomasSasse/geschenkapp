@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎁 Geschenk-Abrechnung – WSF & Playmobilfunk</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fffbe6 url('assets/background.png') no-repeat center center;
+      background-size: cover;
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 1rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+    .person-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    .button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #9f1239;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="assets/header.png" alt="Header" style="width: 100%; border-radius: 1rem; margin-bottom: 1.5rem;">
+    <h1>👨‍👩‍👧‍👦 Geschenk-Abrechnung für Familiengemeinschaft</h1>
+    <p>Hallo liebe <strong>WSF</strong>- und <strong>Playmobilfunk</strong>-Freunde!<br>
+    Tragt unten ein, wie viel ihr ausgegeben habt. Die App zeigt euch automatisch, wie es ausgeglichen werden kann 🍷🎂</p>
+
+    <div id="form-area"></div>
+    <button class="button" onclick="addPerson()">➕ Familie hinzufügen</button>
+
+    <div style="margin-top:2rem">
+      <h2>💸 Zahlungen</h2>
+      <ul id="payments-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    let data = [
+      { name: 'Familie 1', active: true, contribution: 0 },
+      { name: 'Familie 2', active: true, contribution: 0 },
+      { name: 'Familie 3', active: true, contribution: 0 },
+      { name: 'Familie 4', active: true, contribution: 0 }
+    ];
+
+    function render() {
+      const form = document.getElementById('form-area');
+      form.innerHTML = '';
+      const activePeople = data.filter(p => p.active);
+      const total = activePeople.reduce((sum, p) => sum + p.contribution, 0);
+      const avg = activePeople.length ? total / activePeople.length : 0;
+
+      data.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'person-row';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = p.active;
+        cb.onchange = e => { data[i].active = e.target.checked; render(); };
+
+        const name = document.createElement('input');
+        name.value = p.name;
+        name.oninput = e => { data[i].name = e.target.value; };
+
+        const val = document.createElement('input');
+        val.type = 'number';
+        val.value = p.contribution;
+        val.oninput = e => { data[i].contribution = parseFloat(e.target.value) || 0; render(); };
+
+        const saldo = document.createElement('span');
+        saldo.innerText = `Saldo: ${(p.contribution - avg).toFixed(2)} €`;
+
+        row.append(cb, name, val, saldo);
+        form.appendChild(row);
+      });
+
+      const creditors = activePeople.map(p => ({ ...p })).filter(p => p.contribution > avg);
+      const debtors = activePeople.filter(p => p.contribution < avg);
+      const payments = [];
+
+      for (let debtor of debtors) {
+        let owed = avg - debtor.contribution;
+        for (let creditor of creditors) {
+          const over = creditor.contribution - avg;
+          const portion = Math.min(owed, over);
+          if (portion > 0) {
+            payments.push({ from: debtor.name, to: creditor.name, amount: portion });
+            owed -= portion;
+            creditor.contribution -= portion;
+          }
+          if (owed <= 0) break;
+        }
+      }
+
+      const list = document.getElementById('payments-list');
+      list.innerHTML = '';
+      if (payments.length === 0) {
+        list.innerHTML = '<li>Alle Beiträge sind ausgeglichen.</li>';
+      } else {
+        payments.forEach(p => {
+          const li = document.createElement('li');
+          li.innerText = `${p.from} zahlt ${p.amount.toFixed(2)} € an ${p.to}`;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    function addPerson() {
+      data.push({ name: `Familie ${data.length + 1}`, active: true, contribution: 0 });
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
