@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thomas Geschenk-Abrechnung – LIVE</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <meta name="theme-color" content="#9f1239" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fffbe6;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .row input[type="text"] {
+      width: 100%;
+      max-width: 250px;
+      padding: 0.4rem;
+    }
+    .row input[type="number"] {
+      width: 100%;
+      max-width: 100px;
+      padding: 0.4rem;
+    }
+    .row input[type="checkbox"] {
+      flex: 0 0 auto;
+    }
+    .button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #9f1239;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      .row {
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="assets/header.png" alt="Header" style="width: 100%; border-radius: 1rem; margin-bottom: 1rem;" />
+    <h1>🎁 Thomas Geschenk-Abrechnung – LIVE</h1>
+    <p>Gemeinsam schenken – gemeinsam sehen, wer was beigesteuert hat.</p>
+    <div id="families"></div>
+    <button class="button" onclick="addFamily()">➕ Familie hinzufügen</button>
+    <h2 style="margin-top:2rem">💸 Zahlungen</h2>
+    <ul id="payments"></ul>
+  </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnmptcPPnOXDMCPL6OE_CHOl1xCS-Xgsk",
+      authDomain: "geschenkapp-91046.firebaseapp.com",
+      databaseURL: "https://geschenkapp-91046-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "geschenkapp-91046",
+      storageBucket: "geschenkapp-91046.firebasestorage.app",
+      messagingSenderId: "762458542948",
+      appId: "1:762458542948:web:9bdd39d254a6670c21a071"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const ref = db.ref("familien");
+
+    ref.on("value", snapshot => {
+      const data = snapshot.val() || {};
+      render(data);
+    });
+
+    function render(data) {
+      const container = document.getElementById("families");
+      container.innerHTML = "";
+      const entries = Object.entries(data);
+      const active = entries.filter(([_, p]) => p.active);
+      const total = active.reduce((sum, [_, p]) => sum + p.contribution, 0);
+      const avg = active.length ? total / active.length : 0;
+
+      entries.forEach(([id, p]) => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = p.active;
+        cb.onchange = () => update(id, "active", cb.checked);
+
+        const name = document.createElement("input");
+        name.type = "text";
+        name.value = p.name;
+        name.onblur = () => {
+          update(id, "name", name.value);
+          const timerEl = document.getElementById("timer_" + id);
+          if (timerEl && !name.value.startsWith("Familie ")) {
+            timerEl.remove();
+          }
+        };
+
+        const val = document.createElement("input");
+        val.type = "number";
+        val.value = p.contribution;
+        val.onblur = () => update(id, "contribution", parseFloat(val.value) || 0);
+
+        const delBtn = document.createElement("button");
+        delBtn.innerText = "🗑️";
+        delBtn.title = "Eintrag löschen";
+        delBtn.style.padding = "0.3rem 0.6rem";
+        delBtn.style.borderRadius = "6px";
+        delBtn.style.border = "none";
+        delBtn.style.background = "#eee";
+        delBtn.style.cursor = "pointer";
+        delBtn.onclick = () => {
+          if (confirm('Soll dieser Eintrag gelöscht werden?')) {
+            ref.child(id).remove();
+          }
+        };
+
+        row.append(cb, name, val, delBtn);
+
+        if (p.name && p.name.startsWith("Familie ")) {
+          const timer = document.createElement("span");
+          timer.id = "timer_" + id;
+          timer.style.fontSize = "0.8rem";
+          timer.style.marginLeft = "1rem";
+          timer.style.color = "#9f1239";
+          timer.style.display = "block";
+          let remaining = 60;
+          timer.textContent = "";
+          setTimeout(() => {
+            timer.textContent = "Löschen in 60s";
+            const interval = setInterval(() => {
+              remaining--;
+              timer.textContent = "Löschen in " + remaining + "s";
+              if (remaining <= 0) clearInterval(interval);
+            }, 1000);
+          }, 10000);
+          row.append(timer);
+        }
+
+        container.appendChild(row);
+      });
+
+      const list = document.getElementById("payments");
+      list.innerHTML = "";
+      const payments = [];
+      const creditors = active.map(([_, p]) => ({ ...p })).filter(p => p.contribution > avg);
+      const debtors = active.map(([_, p]) => ({ ...p })).filter(p => p.contribution < avg);
+
+      for (let d of debtors) {
+        let owed = avg - d.contribution;
+        for (let c of creditors) {
+          const over = c.contribution - avg;
+          const part = Math.min(owed, over);
+          if (part > 0) {
+            payments.push(`${d.name} zahlt ${part.toFixed(2)} € an ${c.name}`);
+            owed -= part;
+            c.contribution -= part;
+          }
+          if (owed <= 0) break;
+        }
+      }
+
+      if (payments.length === 0) {
+        list.innerHTML = "<li>Alle Beiträge sind ausgeglichen.</li>";
+      } else {
+        payments.forEach(p => {
+          const li = document.createElement("li");
+          li.innerText = p;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    function update(id, key, value) {
+      ref.child(id).update({ [key]: value });
+    }
+
+    function addFamily() {
+      ref.once("value", snapshot => {
+        const data = snapshot.val() || {};
+        const existing = Object.values(data)
+          .map(f => f.name)
+          .filter(name => name && name.startsWith("Familie "))
+          .map(name => parseInt(name.replace("Familie ", "").trim()))
+          .filter(n => !isNaN(n));
+        let next = 1;
+        while (existing.includes(next)) next++;
+        const id = Date.now().toString();
+        const newName = "Familie " + next;
+        ref.child(id).set({ name: newName, active: true, contribution: 0 });
+
+        setTimeout(() => {
+          ref.child(id).once("value", snap => {
+            const entry = snap.val();
+            if (entry && entry.name === newName) {
+              ref.child(id).remove();
+              const timerEl = document.getElementById("timer_" + id);
+              if (timerEl) timerEl.remove();
+            }
+          });
+        }, 70000);
+      });
+    }
+  </script>
+</body>
+</html>
