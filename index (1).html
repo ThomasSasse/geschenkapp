@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thomas Geschenk-Abrechnung - LIVE</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.png" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+    }
+    header {
+      background: url('assets/header.png') center/cover no-repeat;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 0 0 3px black;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    main {
+      padding: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .delete-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: red;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 0.9rem;
+      }
+      input {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Thomas Geschenk-Abrechnung - LIVE</h1>
+  </header>
+  <main>
+    <button onclick="addFamily()">+ Familie hinzufügen</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Familie</th>
+          <th>Auslagen (€)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="familienListe"></tbody>
+    </table>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      set,
+      remove,
+      get,
+      child
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnmptcPPnOXDMCPL6OE_CHOl1xCS-Xgsk",
+      authDomain: "geschenkapp-91046.firebaseapp.com",
+      projectId: "geschenkapp-91046",
+      storageBucket: "geschenkapp-91046.appspot.com",
+      messagingSenderId: "762458542948",
+      appId: "1:762458542948:web:9bdd39d254a6670c21a071",
+      databaseURL: "https://geschenkapp-91046-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const refFamilien = ref(db, "familien");
+
+    function addFamily() {
+      get(refFamilien).then(snapshot => {
+        const data = snapshot.val() || {};
+        const used = Object.values(data)
+          .map(p => parseInt((p.name || "").replace("Familie ", ""), 10))
+          .filter(n => !isNaN(n));
+        let nr = 1;
+        while (used.includes(nr)) nr++;
+        const id = Date.now().toString();
+        const name = "Familie " + nr;
+        set(child(refFamilien, id), { name, contribution: 0, createdAt: Date.now() });
+
+        setTimeout(() => {
+          get(child(refFamilien, id)).then(snap => {
+            const val = snap.val();
+            if (val && val.name === name) remove(child(refFamilien, id));
+          });
+        }, 20000);
+      });
+    }
+
+    onValue(refFamilien, snapshot => {
+      const data = snapshot.val() || {};
+      const tbody = document.getElementById("familienListe");
+      tbody.innerHTML = "";
+      const sorted = Object.entries(data).sort((a, b) => a[1].createdAt - b[1].createdAt);
+      for (const [key, val] of sorted) {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        const inputName = document.createElement("input");
+        inputName.value = val.name;
+        inputName.oninput = () => {
+          set(child(refFamilien, key), { ...val, name: inputName.value });
+        };
+        tdName.appendChild(inputName);
+
+        const tdEuro = document.createElement("td");
+        const inputEuro = document.createElement("input");
+        inputEuro.type = "number";
+        inputEuro.value = val.contribution || 0;
+        inputEuro.oninput = () => {
+          set(child(refFamilien, key), { ...val, contribution: parseFloat(inputEuro.value) || 0 });
+        };
+        tdEuro.appendChild(inputEuro);
+
+        const tdDel = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.innerHTML = "🗑️";
+        btn.className = "delete-btn";
+        btn.onclick = () => remove(child(refFamilien, key));
+        tdDel.appendChild(btn);
+
+        tr.append(tdName, tdEuro, tdDel);
+        tbody.appendChild(tr);
+      }
+    });
+  </script>
+</body>
+</html>
