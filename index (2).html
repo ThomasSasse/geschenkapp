@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Thomas Geschenk-Abrechnung - LIVE</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.png" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <script defer src="main.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      background: #f9f9f9;
+    }
+    header {
+      background-image: url("assets/header.png");
+      background-size: cover;
+      background-position: center;
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      color: white;
+      font-size: 1.5em;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px black;
+    }
+    main {
+      padding: 10px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .familie-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .familie-row input {
+      flex: 1;
+      padding: 5px;
+      font-size: 1em;
+    }
+    .delete-button {
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      color: red;
+    }
+    #add-family {
+      margin-top: 20px;
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>Thomas Geschenk-Abrechnung - LIVE</header>
+  <main>
+    <div style="display: flex; gap: 10px; font-weight: bold;">
+      <div style="flex: 1;">Familie</div>
+      <div style="flex: 1;">Auslagen (€)</div>
+    </div>
+    <div id="familien-container"></div>
+    <button id="add-family">+ Familie hinzufügen</button>
+  </main>
+</body>
+</html>
