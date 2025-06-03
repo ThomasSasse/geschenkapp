@@ -142,27 +142,18 @@
 
         row.append(cb, name, val, delBtn);
 
-        if (p.name && p.name.startsWith("Familie ")) {
-          const timer = document.createElement("span");
-          timer.id = "timer_" + id;
-          timer.style.fontSize = "0.8rem";
-          timer.style.marginLeft = "1rem";
-          timer.style.color = "#9f1239";
-          timer.style.display = "block";
-          let remaining = 20;
-          timer.textContent = "";
-          setTimeout(() => {
-            timer.textContent = "Löschen in 20s";
-            const interval = setInterval(() => {
-              remaining--;
-              timer.textContent = "Löschen in " + remaining + "s";
-              if (remaining <= 0) clearInterval(interval);
-            }, 1000);
-          }, 10000);
-          row.append(timer);
-        }
+// Automatische Löschung, wenn Eintrag nicht überschrieben wurde
+if (p.name && p.name.startsWith("Familie ")) {
+  setTimeout(() => {
+    get(ref(db, `familien/${id}`)).then((snap) => {
+      if (snap.exists() && snap.val().name === `Familie ${id}`) {
+        remove(ref(db, `familien/${id}`));
+      }
+    });
+  }, 30000); // 10 Sekunden Vorlauf + 20 Sekunden Countdown
+}
 
-        container.appendChild(row);
+container.appendChild(row);
       });
 
       const list = document.getElementById("payments");
